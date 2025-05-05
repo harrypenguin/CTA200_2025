@@ -1,0 +1,96 @@
+    1  ls
+    2  /cita/local/bin/passwd
+    3  cd /fs/
+    4  cd/fs/lustre/scratch/USERNAME
+    5  cd /fs/lustre/scratch/USERNAME
+    6  pwd
+    7  cd /lustre/scratch/hpeng
+    8  ls
+    9  cd lustre
+   10  ls
+   11  cd scratch
+   12  ls
+   13  cd hpeng
+   14  ls
+   15  mkdir assignment_1
+   16  cd assignment_1/
+   17  touch README.md
+   18  vi README.md
+   19  cat README.md 
+   20  find Hello_world.c
+   21  pwd
+   22  cd ..
+   23  pwd
+   24  cd ../../..
+   25  pwd
+   26  find Hello_world.c
+   27  cd /lustre/scratch/murray
+   28  pwd
+   29  cd /lustre/scratch/murray
+   30  cd cd lustre/scratch/murray
+   31  cd lustre/scratch/murray
+   32  l
+   33  ls
+   34  cd ..
+   35  pwd
+   36  find murray Hello_world.c
+   37  ls
+   38  cd ..
+   39  pwd
+   40  ls
+   41  cd ..
+   42  ls
+   43  exit
+   44  ls
+   45  cd home/murray
+   46  cd /home/murray
+   47  ls
+   48  find Hello_world.c
+   49  cd ..
+   50  find /home/murray/ Hello_world.c
+   51  python /home/murray/hello_world.py
+   52  python3 /home/murray/hello_world.py
+   53  cd \home\murray\tmp
+   54  pwd
+   55  cd \murray\tmp
+   56  cd ..
+   57  pwd
+   58  cd /home/murray/tmp
+   59  ls
+   60  scp Hello_world.py hpeng@gw.cita.utoronto.ca:/fs/lustre/scratch/hpeng/CTA200_2025
+   61  cd ..
+   62  pwd
+   63  cd Papers
+   64  cd tmp
+   65  ls
+   66  scp Hello_world.c hpeng@gw.cita.utoronto.ca:/fs/lustre/scratch/hpeng/CTA200_2025
+   67  exit
+   68  cd fs/lustre/scratch/hpeng
+   69  cd /fs/lustre/scratch/hpeng
+   70  ls
+   71  cd CTA200_2025/
+   72  ls
+   73  mv Hello_world.c assignment_1/
+   74  mv Hello_world.py assignment_1/
+   75  ls
+   76  cd assignment_1/
+   77  ls
+   78  mv Hello_world.py assignment_1/Hello_world_peng.py
+   79  mv Hello_world.py Hello_world_peng.py
+   80  mv Hello_world.c Hello_world_peng.c
+   81  ls
+   82  gcc -Wall Hello_world_peng.c -o Hello_world
+   83  cat Hello_world_peng.c
+   84  ls
+   85  vi Hello_world_peng.c
+   86  vi Hello_world_peng.py
+   87  gcc -Wall Hello_world_peng.c -o Hello_world
+   88  Hello_world
+   89  ./Hello_world 
+   90  python3 Hello_world_peng.py
+   91  python Hello_world_peng.py
+   92  ./Hello_world | output_c.txt
+   93  ./Hello_world > output_c.txt
+   94  python Hello_world_peng.py > output_python.txt
+   95  ls
+   96  history > history.txt

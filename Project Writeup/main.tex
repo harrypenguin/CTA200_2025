@@ -13,17 +13,17 @@
 \maketitle
 
 \section{Introduction}
-The Sloan Digital Sky Survey (SDSS) provides high-resolution optical spectra of galaxies that contain rich physical information, but the high dimensionality (typically 1000+ wavelength bins per spectrum) makes interpretation and visualization challenging. To address this, Portillo et al.\ \citep{Portillo2020} proposed using a Variational Autoencoder (VAE) to perform non-linear dimensionality reduction of galaxy spectra. In this project, I reproduce the core findings of that work using a standard (non-variational) autoencoder. This will be my CTA200 course project and is done as preparation for my research this summer. 
+The Sloan Digital Sky Survey (SDSS) provides high-resolution optical spectra of galaxies that contain rich physical information, but the high dimensionality (typically 1000+ wavelength bins per spectrum) makes interpretation and visualization challenging. To address this, Portillo et al.\ \citep{Portillo2020} proposed using a Variational Autoencoder (VAE) to perform non-linear dimensionality reduction of galaxy spectra. In this project, I reproduce the core findings of their work using a standard (non-variational) autoencoder. This will be my CTA200 course project and is done as preparation for my research this summer. 
 
 \section{Method}
 \subsection{Data Processing}
-The dataset contains $\sim$64,000 galaxy spectra from SDSS, originally compiled for the VAE study by Portillo et al. Each spectrum is sampled over 1000 logarithmically spaced wavelength bins ranging from approximately 3388 \AA{} to 8310 \AA{}. The raw spectra are reconstructed from PCA coefficients using the \texttt{sdss\_corrected\_spectra} utility from \texttt{astroML} \citep{VanderPlas2012}, then normalized by their respective PCA norms:
+The dataset contains $\sim$64,000 galaxy spectra from SDSS, originally compiled for the VAE study by Portillo et al. Each spectrum is sampled over 1000 wavelength bins ranging from approximately 3388 \AA{} to 8310 \AA{}. The raw spectra are reconstructed from PCA coefficients using the \texttt{sdss\_corrected\_spectra} utility from \texttt{astroML} \citep{VanderPlas2012}, then normalized by their respective PCA norms:
 \begin{equation}
 \mathbf{x}_i = \frac{\text{rawspec}_i}{\text{norm}_i},
 \end{equation}
 where $\mathbf{x}_i$ is the normalized spectrum of the $i$-th galaxy.
 
-Normalization serves three main purposes: (1) it removes variations in total flux between galaxies, allowing the model to focus on spectral shape rather than brightness; (2) it stabilizes training by ensuring that all inputs have similar magnitudes; and (3) it aligns with the preprocessing used in the original VAE paper, enabling direct comparisons.
+Normalization serves these main purposes: (1) it removes variations in total flux between galaxies, allowing the model to focus on spectral shape rather than brightness; (2) it stabilizes training by ensuring that all inputs have similar magnitudes; and (3) it aligns with the preprocessing used in the original VAE paper, enabling direct comparisons.
 
 Each spectrum is associated with a pixel-wise error estimate $\sigma_i$, which is used to compute weights used later in the loss function:
 \begin{equation}
@@ -59,9 +59,9 @@ The autoencoder is trained by optimizing the trainable parameters $\theta$, whic
 \begin{equation}
 \theta^* = \arg\min_\theta \mathcal{L}(\mathbf{x}, \hat{\mathbf{x}}_\theta, \mathbf{w}) = \frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{1000} w_{ij} (x_{ij} - \hat{x}_{ij})^2
 \end{equation}
-where $\hat{\mathbf{x}}_\theta$ is the network’s reconstruction of $\mathbf{x}$ given parameters $\theta$, $N$ is the batch size, and $j$ indexes the wavelength bins. The network hyperparameters are chosen per Portillo et al.'s findings, which show that 6 latent parameters and a 1000-703-94-6-94-703-1000 architecture achieve the best results in terms of reconstruction loss. This setup is the point beyond which further increases in model capacity yielded diminishing improvements. The intuition behind this autoencoder is that by setting minimizing reconstruction loss as the optimization objective and forcing the model to funnel information through a `bottleneck', the latent parameters will capture the features most important for a high-fidelity reconstruction. In essence, this is similar to PCA. However, we are not restricted to reconstructing the spectra only via linear combinations of the latent parameters, which can yield a more interesting feature map. (Latent space)
+where $\hat{\mathbf{x}}_\theta$ is the network’s reconstruction of $\mathbf{x}$ given parameters $\theta$, $N$ is the batch size, and $j$ indexes the wavelength bins. This formulation is an inverse-variance-weighted MSE, where each pixel's contribution to the loss is scaled by the reciprocal of its squared uncertainty. This emphasizes high signal-to-noise regions of the spectrum while appropriately down-weighting noisier or masked pixels. This is analogous to the loss function used by Portillo et al. The network hyperparameters are chosen per Portillo et al.'s findings, which show that 6 latent parameters and a 1000-703-94-6-94-703-1000 architecture achieve the best results in terms of reconstruction loss. This setup is the point beyond which further increases in model capacity yielded diminishing improvements. The intuition behind this autoencoder is that by setting minimizing reconstruction loss as the optimization objective and forcing the model to funnel information through a `bottleneck', the latent parameters will capture the features most important for a high-fidelity reconstruction. In essence, this is similar to PCA. However, we are not restricted to reconstructing the spectra only via linear combinations of the latent parameters, which can yield a more interesting feature map. (Latent space)
 
-Training was conducted using PyTorch Lightning \citep{Falcon2019}, which simplifies training loop management, and tracked using Weights \\& Biases \citep{Biewald2020}. Training is performed using the Adam optimizer \citep{adam} with an initial learning rate of $10^{-3}$. Essentially, we are performing a variation of stochastic gradient descent on the loss landscape, with the goal of reaching a global minimum. The learning rate corresponds to the step size of this descent. A \texttt{ReduceLROnPlateau} scheduler reduces the learning rate by a factor of 10 after 5 epochs of no improvement in validation loss. Early stopping halts training if no improvement is seen for 10 consecutive epochs. This training regimen is also taken from Portillo et al.
+Training was conducted using PyTorch Lightning \citep{Falcon2019}, which simplifies training loop management, and tracked using Weights \& Biases \citep{Biewald2020}. Training is performed using the Adam optimizer \citep{adam} with an initial learning rate of $10^{-3}$. Essentially, we are performing a variation of stochastic gradient descent on the loss landscape, with the goal of reaching a global minimum. The learning rate corresponds to the step size of this descent. A \texttt{ReduceLROnPlateau} scheduler reduces the learning rate by a factor of 10 after 5 epochs of no improvement in validation loss. Early stopping halts training if no improvement is seen for 10 consecutive epochs. This training regimen is also taken from Portillo et al.
 
 Figure~\ref{fig:architecture} shows the architecture schematic of the model.
 
@@ -114,7 +114,7 @@ Figure~\ref{fig:spectra} shows one such example.
 
 Notice that the general shape is captured very well, and the emission line around 6500 \AA{} (possibly the $H\alpha$ line) is reconstructed correctly.
 
-To further evaluate reconstruction quality, we generate a 2D histogram of residuals (difference between input and reconstruction) as a function of wavelength and inverse variance. This visualization helps assess whether reconstruction errors are systematically correlated with spectral features or uncertainty levels.
+To further evaluate reconstruction quality, we generate a 2D histogram of residuals (difference between input and reconstruction). This visualization helps assess whether reconstruction errors are systematically correlated with spectral features or uncertainty levels.
 
 Figure~\ref{fig:residual_histogram} displays this.
 
@@ -125,7 +125,7 @@ Figure~\ref{fig:residual_histogram} displays this.
     \label{fig:residual_histogram}
 \end{figure}
 
-Notice that in general, residuals are tightly distributed around 0, with flux deviations usually no more than 0.05 in either direction. This indicates that the reconstructions are generally very accurate. We also notice, however, that there are vertical bands at common emission line wavelengths (e.g., $H\alpha$, [OIII], [NII]), which indicate that the autoencoder struggles to fully reconstruct narrow, high-contrast features. 
+Notice that in general, residuals are tightly distributed around 0, with flux deviations usually no more than 0.05 in either direction. This indicates that the reconstructions are generally very accurate. We also notice, however, that there are vertical bands at common emission line wavelengths (e.g., $H\alpha$, [OIII], [NII]), which indicate that the autoencoder struggles to fully reconstruct narrow, high-contrast features. We see a specific example of this in Figure 4, where the reconstruction underpredicts the narrow but significant emission line.
 
 \section{Conclusion}
 This project demonstrates that a standard autoencoder can reproduce many of the core results of Portillo et al. (2020), including accurate spectrum reconstructions and, consequentially, a meaningful latent space capable of separating galaxies based on their spectrum. 
